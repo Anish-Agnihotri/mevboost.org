@@ -1,7 +1,7 @@
 import axios from "axios"; // Requests
 import Redis from "ioredis"; // Cache
 import logger from "./utils/logger"; // Logging
-import { BidTrace } from "./utils/types"; // Types
+import type { BidTrace } from "./utils/types"; // Types
 import { PrismaClient } from "@prisma/client"; // Prisma
 
 export default class Collector {
@@ -11,7 +11,7 @@ export default class Collector {
   private relay: { name: string; url: string };
 
   // Redis
-  private redis: Redis = new Redis();
+  private redis: Redis;
   // Prisma
   private prisma: PrismaClient = new PrismaClient();
 
@@ -19,10 +19,12 @@ export default class Collector {
    * Initialize new collector
    * @param {string} name of relay
    * @param {string} url of relay
+   * @param {string} redisUrl to connect
    */
-  constructor(name: string, url: string) {
+  constructor(name: string, url: string, redisUrl: string) {
     logger.info(`Collector: initializing relay: ${name}`);
     this.relay = { name, url };
+    this.redis = new Redis(redisUrl);
   }
 
   /**
@@ -141,7 +143,11 @@ export default class Collector {
       // Insert payloads into database
       const { count }: { count: number } =
         await this.prisma.payloads.createMany({
-          data: freshPayloads,
+          data: freshPayloads.map((payload) => ({
+            // Attach relay name
+            relay: this.relay.name,
+            ...payload,
+          })),
         });
 
       // Confirm insertion
@@ -185,8 +191,8 @@ export default class Collector {
     // Sync payloads
     await this.syncFreshPayloads();
 
-    // Recollect in minute
-    logger.info(`${this.relay.name}: Sleeping for 10s`);
-    setTimeout(() => this.sync(), 1000 * 10);
+    // Recollect in 30s
+    logger.info(`${this.relay.name}: Sleeping for 30s`);
+    setTimeout(() => this.sync(), 1000 * 30);
   }
 }

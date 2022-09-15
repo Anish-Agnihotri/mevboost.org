@@ -1,9 +1,21 @@
+import dotenv from "dotenv"; // Env vars
+import CONFIG from "../config.json"; // Config
 import Collector from "./collector"; // Collection
 
+// Setup env vars
+dotenv.config();
+
 (async () => {
-  const flashbots = new Collector(
-    "Flashbots",
-    "https://0xac6e77dfe25ecd6110b8e780608cce0dab71fdd5ebea22a16c0205200f2f8e2e3ad3b71d3499c54ad14d6c21b41a37ae@boost-relay.flashbots.net"
+  // Collect env vars
+  const REDIS_URL: string | undefined = process.env.REDIS_URL;
+  if (!REDIS_URL) throw new Error("Missing Redis URL");
+
+  // Setup relays
+  const relays: Collector[] = Object.entries(CONFIG.relays).map(
+    ([name, url]) => new Collector(name, url, REDIS_URL)
   );
-  await flashbots.sync();
+
+  // Setup sync processes
+  const processes: Promise<void>[] = relays.map((relay) => relay.sync());
+  Promise.all(processes);
 })();
