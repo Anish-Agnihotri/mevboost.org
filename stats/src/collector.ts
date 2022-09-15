@@ -48,7 +48,7 @@ export default class Collector {
       const newestSlot: string = data[0].slot;
       const oldestSlot: string = data[data.length - 1].slot;
       logger.info(
-        `${this.relay.name}: Collected ${data.length} payloads (${newestSlot} -> ${oldestSlot}).`
+        `${this.relay.name}: Collected ${data.length} payloads (${newestSlot} -> ${oldestSlot})`
       );
 
       // Return BidTraces
@@ -72,6 +72,12 @@ export default class Collector {
     if (slot) this.syncedSlot = slot;
   }
 
+  /**
+   * Collects fresh payloads not indexed in database
+   * @param {string | undefined} cursor optional starting point
+   * @param {string | undefined} lastSynced optional collection breakpoint
+   * @returns {Promise<BidTrace[]>} payloads
+   */
   private async collectFreshPayloads(
     cursor: string | undefined = undefined,
     lastSynced: string | undefined = undefined
@@ -79,43 +85,108 @@ export default class Collector {
     let payloads: BidTrace[] = [];
 
     // Collect initial payload
-    const collection: BidTrace[] = await this.collectPayloads(cursor);
-    console.log("Collected: ", collection.length);
-    payloads = [...payloads, ...collection];
+    const initialPayload: BidTrace[] = await this.collectPayloads(cursor);
+    payloads = [...payloads, ...initialPayload];
 
-    // Check for last synced entity
+    // If collection breakpoint exists
     if (lastSynced) {
-      const upToDate: boolean = payloads.some(
+      // Check if breakpoint is in current set
+      const breakpoint: boolean = payloads.some(
         (payload) => payload.slot === lastSynced
       );
-      if (upToDate) return payloads;
+
+      // If breakpoint found, return set before breakpoint
+      if (breakpoint) {
+        return payloads.filter(
+          // Filter for payloads where slot > already synced
+          (payload) => Number(payload.slot) > Number(lastSynced)
+        );
+      }
     }
 
-    // If =100 entities, recollect with cursor
-    if (collection.length === 100) {
-      const cursor = collection[collection.length - 1].slot;
-      const additional: BidTrace[] = await this.collectFreshPayloads(cursor);
-      payloads = [...payloads, ...additional];
+    // If initial collection has 100 entities, paginate recursively
+    if (initialPayload.length === 100) {
+      const lastSlot: string = initialPayload[initialPayload.length - 1].slot;
+      const lastCursor: string = String(Number(lastSlot) - 1);
+      const nextPayload: BidTrace[] = await this.collectFreshPayloads(
+        lastCursor
+      );
+      payloads = [...payloads, ...nextPayload];
     }
 
-    // Return payloads
+    // Return collected payloads
     return payloads;
   }
 
-  private async loadFreshPayloads() {
+  /**
+   * Syncs fresh payloads to database
+   */
+  private async syncFreshPayloads(): Promise<void> {
     // Update last synced slot
     await this.updateSyncedSlot();
 
     // Collect fresh payloads
-    const payloads = await this.collectFreshPayloads(
+    const freshPayloads: BidTrace[] = await this.collectFreshPayloads(
       undefined,
       this.syncedSlot
     );
 
-    console.log(payloads.length);
+    // If no fresh payloads, skip
+    if (freshPayloads.length === 0) {
+      logger.info(`${this.relay.name}: No fresh payloads`);
+      return;
+    }
+
+    try {
+      // Insert payloads into database
+      const { count }: { count: number } =
+        await this.prisma.payloads.createMany({
+          data: freshPayloads,
+        });
+
+      // Confirm insertion
+      if (count !== freshPayloads.length) {
+        logger.error(
+          `${this.relay.name}: ${freshPayloads.length} payloads do not match inserted count: ${count}`
+        );
+        throw new Error("Payload insertion count mismatch");
+      }
+
+      // Log success
+      logger.info(`${this.relay.name}: Inserted ${count} payloads to database`);
+    } catch (e) {
+      // Log failure + throw
+      logger.error(
+        `${
+          this.relay.name
+        }: payload insertion to database failed. (${JSON.stringify(e)})`
+      );
+      throw new Error("Failed inserting payloads to database");
+    }
+
+    // Update synced slot in redis
+    const latestSlot: string = freshPayloads[0].slot;
+    const success: "OK" = await this.redis.set(this.relay.name, latestSlot);
+    // Check for cache insertion
+    if (success !== "OK") {
+      logger.error(
+        `${this.relay.name}: Could not update latest slot in Redis: ${latestSlot}`
+      );
+      throw new Error("Failed inserting to Redis cache");
+    }
+
+    // Log success
+    logger.info(
+      `${this.relay.name}: Updated slot ${latestSlot} as latest in Redis`
+    );
   }
 
   public async sync() {
-    await this.loadFreshPayloads();
+    // Sync payloads
+    await this.syncFreshPayloads();
+
+    // Recollect in minute
+    logger.info(`${this.relay.name}: Sleeping for 10s`);
+    setTimeout(() => this.sync(), 1000 * 10);
   }
 }
