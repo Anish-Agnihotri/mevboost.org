@@ -3,3 +3,9 @@ node_modules/
 
 # Built files
 dist/
+
+# Env vars
+*.env
+
+# Log files
+*.log
