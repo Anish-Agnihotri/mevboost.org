@@ -1,5 +1,5 @@
 {
-  "name": "boost-info-stats",
+  "name": "relay-review-stats",
   "version": "1.0.0",
   "description": "Tracks mev-boost relay statistics.",
   "main": "dist/src/app.js",
@@ -8,7 +8,6 @@
     "dev": "ts-node src/app.ts",
     "start": "npm run build && node dist/src/app.js"
   },
-  "keywords": [],
   "author": "Anish Agnihotri",
   "license": "MIT",
   "devDependencies": {
