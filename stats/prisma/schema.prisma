@@ -19,8 +19,8 @@ model payloads {
   builder_pubkey String
   proposer_pubkey String
   proposer_fee_recipient String
-  gas_limit String
-  gas_used String
+  gas_limit String? // Optional: Blocknative not to-spec
+  gas_used String? // Optional: Blocknative not to-spec
   value String
   inserted_at DateTime @default(now())
 }

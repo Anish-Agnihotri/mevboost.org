@@ -46,6 +46,12 @@ export default class Extractor {
         }`
       );
 
+      // No payloads returned
+      if (data.length === 0) {
+        logger.info(`${this.relay.name}: No payloads in response`);
+        return [];
+      }
+
       // Log retrieval
       const newestSlot: string = data[0].slot;
       const oldestSlot: string = data[data.length - 1].slot;
