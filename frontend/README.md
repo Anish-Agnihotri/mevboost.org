@@ -2,7 +2,21 @@
 
 Interface to [stats](../stats) collection.
 
-## Commands
+## Run locally
+
+```bash
+# Add env variables
+cp .env.sample .env
+vim .env
+
+# Install dependencies
+npm install
+
+# Run dev environment
+npm run dev
+```
+
+## Astro commands
 
 | Command                | Action                                           |
 | :--------------------- | :----------------------------------------------- |

@@ -1,6 +1,13 @@
 ---
 import Stat from "../components/Stat.astro";
 import Layout from "../layouts/Layout.astro";
+import type { StatsResponse } from "./stats";
+
+// Collect statistics
+const stats: StatsResponse = await (
+  await fetch("http://localhost:3000/stats")
+).json();
+console.log(stats);
 ---
 
 <Layout>
