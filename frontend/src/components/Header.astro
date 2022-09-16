@@ -1,0 +1,79 @@
+<div class="header">
+  {/* View source header */}
+  <div class="subheader">
+    <a
+      href="https://github.com/anish-agnihotri/relay-review"
+      target="_blank"
+      rel="noopener noreferrer">VIEW SOURCE ON GITHUB</a
+    >
+  </div>
+
+  {/* Title header */}
+  <div class="mainheader">
+    <h3>Relay.Review</h3>
+    <p>
+      Tracking <a
+        href="https://boost.flashbots.net/"
+        target="_blank"
+        rel="noopener noreferrer">MEV-Boost</a
+      > relays and block builders. A quick hack by <a
+        href="https://anishagnihotri.com"
+        target="_blank"
+        rel="noopener noreferrer">Anish</a
+      >.
+    </p>
+  </div>
+</div>
+
+<style lang="scss">
+  .header {
+    background-color: rgba(0, 0, 0, 0.02);
+    border-bottom: 1px solid #ececec;
+
+    .subheader {
+      background-color: black;
+      font-family: monospace;
+      font-size: 12px;
+
+      a {
+        padding: 8px 24px;
+        color: white;
+        display: block;
+
+        &:hover {
+          opacity: 0.7;
+        }
+      }
+    }
+
+    .mainheader {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 20px 24px;
+      min-height: 100px;
+
+      h3 {
+        margin-top: 0px;
+        margin-bottom: 5px;
+        color: blue;
+      }
+
+      p {
+        margin: 0px;
+        font-size: 14px;
+        line-height: 150%;
+        color: rgba(0, 0, 0, 0.8);
+
+        a {
+          color: inherit;
+          border-bottom: 1px dashed rgba(0, 0, 0, 0.8);
+
+          &:hover {
+            opacity: 0.7;
+          }
+        }
+      }
+    }
+  }
+</style>

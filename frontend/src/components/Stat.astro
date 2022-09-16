@@ -1,0 +1,19 @@
+---
+export interface Props {
+  title: string;
+  value: string;
+  context: string;
+}
+
+const { title, value, context } = Astro.props as Props;
+---
+
+<div class="stat">
+  <h4>{title}</h4>
+  <h2>{value}</h2>
+  <p>{context}</p>
+</div>
+
+<style lang="scss">
+
+</style>

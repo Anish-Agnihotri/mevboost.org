@@ -1,0 +1,43 @@
+---
+import Header from "../components/Header.astro";
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {/* General */}
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+
+    {/* Astro */}
+    <meta name="generator" content={Astro.generator} />
+  </head>
+
+  <body>
+    <Header />
+    <slot />
+
+    <style is:global>
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        margin: 0px;
+        padding: 0px;
+        font-family: system-ui, sans-serif;
+        font-feature-settings: "ss01";
+        text-rendering: optimizeLegibility;
+      }
+
+      body {
+        margin: 0px;
+        overscroll-behavior-y: none;
+      }
+
+      a {
+        text-decoration: none;
+      }
+    </style>
+  </body>
+</html>

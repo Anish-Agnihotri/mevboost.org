@@ -1,15 +1,16 @@
 ---
+import Stat from "../components/Stat.astro";
+import Layout from "../layouts/Layout.astro";
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width" />
-    <meta name="generator" content={Astro.generator} />
-    <title>Astro</title>
-  </head>
-  <body>
-    <h1>Astro</h1>
-  </body>
-</html>
+<Layout>
+  <main>
+    <div class="stat-list">
+      <Stat
+        title="Payload count"
+        value="1,920"
+        context="Total payloads delivered by all relays."
+      />
+    </div>
+  </main>
+</Layout>
