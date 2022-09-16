@@ -15,5 +15,38 @@ const { title, value, context } = Astro.props as Props;
 </div>
 
 <style lang="scss">
+  .stat {
+    padding: 24px;
+    width: 100%;
+    border-bottom: 1px solid #ececec;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 
+    &:not(last-of-type) {
+      border-right: 1px solid #ececec;
+    }
+
+    h4 {
+      margin: 0px;
+      font-size: 14px;
+      color: rgba(0, 0, 0, 0.8);
+    }
+
+    h2 {
+      margin: 10px 0px;
+    }
+
+    p {
+      font-size: 14px;
+      line-height: 150%;
+      margin: 0px;
+    }
+  }
+
+  @media screen and (max-width: 800px) {
+    .stat {
+      border-right: none;
+    }
+  }
 </style>

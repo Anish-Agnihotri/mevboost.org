@@ -7,17 +7,46 @@ import type { StatsResponse } from "./stats";
 const stats: StatsResponse = await (
   await fetch("http://localhost:3000/stats")
 ).json();
-console.log(stats);
 ---
 
 <Layout>
   <main>
+    {/* General Statistics */}
     <div class="stat-list">
+      {/* Total payloads delivered */}
       <Stat
         title="Payload count"
-        value="1,920"
+        value={stats.total.toLocaleString("us-en")}
         context="Total payloads delivered by all relays."
+      />
+
+      {/* Relay dominance */}
+      <Stat
+        title={`${stats.relays[0]?.name} dominance`}
+        value={`${(stats.relays[0]?.count ?? 0) / 10}%`}
+        context={`Percentage of last 1,000 payloads delivered by ${stats.relays[0]?.name}.`}
+      />
+
+      {/* Active relays */}
+      <Stat
+        title="Active relays"
+        value={stats.relays.length.toLocaleString("us-en")}
+        context={`Number of relays delivering at least 1 of last 1,000 payloads (${stats.relays
+          .map(({ name }) => name)
+          .join(", ")}).`}
       />
     </div>
   </main>
 </Layout>
+
+<style>
+  .stat-list {
+    display: flex;
+  }
+
+  @media screen and (max-width: 800px) {
+    .stat-list {
+      flex-direction: column;
+    }
+  }
+</style>

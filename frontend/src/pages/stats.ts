@@ -7,8 +7,8 @@ const redis = new Redis(import.meta.env.REDIS_URL);
 export type StatsResponse = {
   total: number;
   sample: number;
-  builders: Record<string, number>;
-  relays: Record<string, { reward: string; count: number }>;
+  builders: { builder_pubkey: string; count: number }[];
+  relays: { name: string; reward: number; count: number }[];
 };
 
 export async function get() {
