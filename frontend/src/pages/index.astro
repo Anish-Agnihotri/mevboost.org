@@ -1,13 +1,22 @@
 ---
+import Redis from "ioredis";
 import Stat from "../components/Stat.astro";
 import Layout from "../layouts/Layout.astro";
-import type { StatsResponse } from "./stats";
 import Ranking from "../components/Ranking.astro";
 
-// Collect statistics
-const stats: StatsResponse = await (
-  await fetch("http://localhost:3000/stats")
-).json();
+type Stats = {
+  total: number;
+  sample: number;
+  builders: { builder_pubkey: string; count: number }[];
+  relays: { name: string; reward: number; count: number }[];
+};
+
+// Setup redis
+const redis = new Redis(import.meta.env.REDIS_URL);
+
+// Collect stats from Redis
+const statsStr: string | null = await redis.get("stats");
+const stats: Stats = JSON.parse(statsStr ?? "");
 ---
 
 <Layout>
