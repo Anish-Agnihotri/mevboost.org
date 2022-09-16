@@ -35,8 +35,8 @@ export default class Transformer {
       return;
     }
 
-    // Total payloads
-    const total: number = payloads.length;
+    // Total payload sample size
+    const sample: number = payloads.length;
     // Public key => count
     let topBuilders: Record<string, number> = {};
     // Relay name => { reward, count }
@@ -78,11 +78,15 @@ export default class Transformer {
       }
     }
 
+    // Collect aggregate statistics
+    const total: number = await this.prisma.payloads.count();
+
     // Store stats in Redis
     const success: "OK" = await this.redis.set(
       "stats",
       JSON.stringify({
         total,
+        sample,
         builders: topBuilders,
         relays: topRelays,
       })
