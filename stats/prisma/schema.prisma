@@ -13,7 +13,7 @@ datasource db {
 model payloads {
   id String @id @default(uuid())
   relay String
-  slot String
+  slot Int
   parent_hash String
   block_hash String
   builder_pubkey String

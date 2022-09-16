@@ -150,9 +150,10 @@ export default class Extractor {
       const { count }: { count: number } =
         await this.prisma.payloads.createMany({
           data: freshPayloads.map((payload) => ({
+            ...payload,
             // Attach relay name
             relay: this.relay.name,
-            ...payload,
+            slot: Number(payload.slot),
           })),
         });
 

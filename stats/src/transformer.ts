@@ -24,7 +24,7 @@ export default class Transformer {
     // Collect last thousand payloads by insertion time
     const payloads: payloads[] | null = await this.prisma.payloads.findMany({
       orderBy: {
-        inserted_at: "desc",
+        slot: "desc",
       },
       take: 1000,
     });
