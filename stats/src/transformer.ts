@@ -83,16 +83,22 @@ export default class Transformer {
 
     // Transform objects to arrays for easier front-end parsing
     const builders: { builder_pubkey: string; count: number }[] =
-      Object.entries(topBuilders).map(([builder, count]) => ({
-        builder_pubkey: builder,
-        count,
-      }));
+      Object.entries(topBuilders)
+        .map(([builder, count]) => ({
+          builder_pubkey: builder,
+          count,
+        }))
+        // Sort descending
+        .sort((a, b) => b.count - a.count);
     const relays: { name: string; reward: number; count: number }[] =
-      Object.entries(topRelays).map(([relay, stat]) => ({
-        name: relay,
-        reward: Number(ethers.utils.formatEther(stat.reward)),
-        count: stat.count,
-      }));
+      Object.entries(topRelays)
+        .map(([relay, stat]) => ({
+          name: relay,
+          reward: Number(ethers.utils.formatEther(stat.reward)),
+          count: stat.count,
+        }))
+        // Sort descending
+        .sort((a, b) => b.count - a.count);
 
     // Store stats in Redis
     const success: "OK" = await this.redis.set(
