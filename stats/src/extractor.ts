@@ -4,7 +4,7 @@ import logger from "./utils/logger"; // Logging
 import type { BidTrace } from "./utils/types"; // Types
 import { PrismaClient } from "@prisma/client"; // Prisma
 
-export default class Collector {
+export default class Extractor {
   // Last synced slot
   private syncedSlot: string | undefined;
   // Relay info
@@ -187,7 +187,7 @@ export default class Collector {
     );
   }
 
-  public async sync() {
+  public async sync(): Promise<void> {
     // Sync payloads
     await this.syncFreshPayloads();
 

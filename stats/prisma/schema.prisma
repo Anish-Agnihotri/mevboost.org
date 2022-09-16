@@ -22,4 +22,5 @@ model payloads {
   gas_limit String
   gas_used String
   value String
+  inserted_at DateTime @default(now())
 }

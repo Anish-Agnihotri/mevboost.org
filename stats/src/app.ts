@@ -1,6 +1,7 @@
 import dotenv from "dotenv"; // Env vars
 import CONFIG from "../config.json"; // Config
-import Collector from "./collector"; // Collection
+import Extractor from "./extractor"; // Collection
+import Transformer from "./transformer"; // Stats
 
 // Setup env vars
 dotenv.config();
@@ -11,11 +12,13 @@ dotenv.config();
   if (!REDIS_URL) throw new Error("Missing Redis URL");
 
   // Setup relays
-  const relays: Collector[] = Object.entries(CONFIG.relays).map(
-    ([name, url]) => new Collector(name, url, REDIS_URL)
+  const relays: Extractor[] = Object.entries(CONFIG.relays).map(
+    ([name, url]) => new Extractor(name, url, REDIS_URL)
   );
+  // Setup stats transformer
+  const stats = new Transformer(REDIS_URL);
 
   // Setup sync processes
   const processes: Promise<void>[] = relays.map((relay) => relay.sync());
-  Promise.all(processes);
+  Promise.all([...processes, stats.sync()]);
 })();
