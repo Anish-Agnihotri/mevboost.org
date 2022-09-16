@@ -2,6 +2,7 @@
 import Stat from "../components/Stat.astro";
 import Layout from "../layouts/Layout.astro";
 import type { StatsResponse } from "./stats";
+import Ranking from "../components/Ranking.astro";
 
 // Collect statistics
 const stats: StatsResponse = await (
@@ -31,21 +32,58 @@ const stats: StatsResponse = await (
       <Stat
         title="Active relays"
         value={stats.relays.length.toLocaleString("us-en")}
-        context={`Number of relays delivering at least 1 of last 1,000 payloads (${stats.relays
+        context={`Number of relays delivering at least 1 of the last 1,000 payloads (${stats.relays
           .map(({ name }) => name)
           .join(", ")}).`}
+      />
+    </div>
+
+    {/* Ranking tables */}
+    <div class="ranking-list">
+      {/* Top relays */}
+      <Ranking
+        title="Top relays"
+        context="Relays sorted by participation in last 1,000 payloads."
+        data={stats.relays
+          // Filter for relays that have delivered at least 1 payload
+          .filter(({ count }) => count > 0)
+          // Setup table structure
+          .map(({ name, reward, count }) => ({
+            Relay: name,
+            "Total value (ETH)": reward.toLocaleString("us-en"),
+            "# Payloads": count,
+          }))}
+      />
+
+      {/* Top builders */}
+      <Ranking
+        title="Top builders"
+        context="Block builders sorted by participation in last 1,000 payloads."
+        data={stats.builders
+          // Filter for builders that have delivered at least 1 payload
+          .filter(({ count }) => count > 0)
+          // Setup table structure
+          .map(({ builder_pubkey, count }) => ({
+            Builder:
+              builder_pubkey.substr(0, 10) +
+              "..." +
+              builder_pubkey.slice(builder_pubkey.length - 10),
+            "# Payloads": count,
+          }))}
       />
     </div>
   </main>
 </Layout>
 
 <style>
-  .stat-list {
+  .stat-list,
+  .ranking-list {
     display: flex;
   }
 
   @media screen and (max-width: 800px) {
-    .stat-list {
+    .stat-list,
+    .ranking-list {
       flex-direction: column;
     }
   }
