@@ -81,14 +81,27 @@ export default class Transformer {
     // Collect aggregate statistics
     const total: number = await this.prisma.payloads.count();
 
+    // Transform objects to arrays for easier front-end parsing
+    const builders: { builder_pubkey: string; count: number }[] =
+      Object.entries(topBuilders).map(([builder, count]) => ({
+        builder_pubkey: builder,
+        count,
+      }));
+    const relays: { name: string; reward: number; count: number }[] =
+      Object.entries(topRelays).map(([relay, stat]) => ({
+        name: relay,
+        reward: Number(ethers.utils.formatEther(stat.reward)),
+        count: stat.count,
+      }));
+
     // Store stats in Redis
     const success: "OK" = await this.redis.set(
       "stats",
       JSON.stringify({
         total,
         sample,
-        builders: topBuilders,
-        relays: topRelays,
+        builders,
+        relays,
       })
     );
     // Check for cache insertion
