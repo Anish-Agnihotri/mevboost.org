@@ -20,5 +20,5 @@ dotenv.config();
 
   // Setup sync processes
   const processes: Promise<void>[] = relays.map((relay) => relay.sync());
-  Promise.all([...processes, stats.sync()]);
+  Promise.allSettled([...processes, stats.sync()]);
 })();
