@@ -1,0 +1,26 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model payloads {
+  id String @id @default(uuid())
+  relay String
+  slot Int
+  parent_hash String
+  block_hash String
+  builder_pubkey String
+  proposer_pubkey String
+  proposer_fee_recipient String
+  gas_limit String? // Optional: Blocknative not to-spec
+  gas_used String? // Optional: Blocknative not to-spec
+  value String
+  inserted_at DateTime @default(now())
+}

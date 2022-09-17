@@ -11,6 +11,10 @@ const image = "https://relay.review/meta.png";
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    {/* General */}
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+
     {/* Primary meta tags */}
     <title>{title}</title>
     <meta name="title" content={title} />
@@ -33,10 +37,6 @@ const image = "https://relay.review/meta.png";
     {/* Favicon */}
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
 
-    {/* General */}
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
-
     {/* Astro */}
     <meta name="generator" content={Astro.generator} />
   </head>
@@ -45,7 +45,7 @@ const image = "https://relay.review/meta.png";
     <Header />
     <slot />
 
-    <style is:global>
+    <style lang="scss" is:global>
       * {
         box-sizing: border-box;
       }
@@ -65,6 +65,31 @@ const image = "https://relay.review/meta.png";
 
       a {
         text-decoration: none;
+      }
+
+      table {
+        width: 100%;
+        border-spacing: 0px;
+
+        tr {
+          th {
+            font-size: 13px;
+            color: rgba(0, 0, 0, 0.7);
+            font-family: monospace;
+            text-transform: uppercase;
+          }
+
+          td {
+            font-size: 15px;
+          }
+
+          th,
+          td {
+            text-align: left;
+            border-bottom: 1px solid #ececec;
+            padding: 8px 24px;
+          }
+        }
       }
     </style>
   </body>

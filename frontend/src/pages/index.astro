@@ -3,6 +3,7 @@ import Redis from "ioredis";
 import Stat from "../components/Stat.astro";
 import Layout from "../layouts/Layout.astro";
 import Ranking from "../components/Ranking.astro";
+import Payloads from "../components/Payloads.astro";
 
 type Stats = {
   total: number;
@@ -81,6 +82,9 @@ const stats: Stats = JSON.parse(statsStr ?? "");
           }))}
       />
     </div>
+
+    {/* Payloads table */}
+    <Payloads />
   </main>
 </Layout>
 
