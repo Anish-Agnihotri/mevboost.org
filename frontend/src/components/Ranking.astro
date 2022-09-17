@@ -1,13 +1,17 @@
 ---
 export interface RelayProps {
   Relay: string;
+  "# Blocks": number;
   "Total value (ETH)": string;
-  "# Payloads": number;
+  "Avg. block value": string;
 }
 
 export interface BuilderProps {
   Builder: string;
-  "# Payloads": number;
+  "# Blocks": number;
+  "Total value (ETH)": string;
+  "Avg. block value": string;
+  "Last used relay": string;
 }
 
 export interface Props {

@@ -6,10 +6,16 @@ import Ranking from "../components/Ranking.astro";
 import Payloads from "../components/Payloads.astro";
 
 type Stats = {
-  total: number;
-  sample: number;
-  builders: { builder_pubkey: string; count: number }[];
-  relays: { name: string; reward: number; count: number }[];
+  total_blocks: number;
+  total_payloads: number;
+  relays: { name: string; value: number; count: number; avg_value: number }[];
+  builders: {
+    pubkey: string;
+    count: number;
+    value: number;
+    avg_value: number;
+    last_relay: string;
+  }[];
 };
 
 // Setup redis
@@ -24,25 +30,32 @@ const stats: Stats = JSON.parse(statsStr ?? "");
   <main>
     {/* General Statistics */}
     <div class="stat-list">
-      {/* Total payloads delivered */}
+      {/* Network participation */}
       <Stat
-        title="Payload count"
-        value={stats.total.toLocaleString("us-en")}
-        context="Total payloads delivered by all relays."
+        title="Network participation"
+        value={`${((stats.total_payloads / stats.total_blocks) * 100).toFixed(
+          2
+        )}%`}
+        context={`% of all blocks built by relays (${stats.total_payloads.toLocaleString(
+          "us-en"
+        )} relays, ${stats.total_blocks.toLocaleString("us-en")} total).`}
       />
 
       {/* Relay dominance */}
       <Stat
         title={`${stats.relays[0]?.name} dominance`}
-        value={`${(stats.relays[0]?.count ?? 0) / 10}%`}
-        context={`Percentage of last 1,000 payloads delivered by ${stats.relays[0]?.name}.`}
+        value={`${(
+          ((stats.relays[0]?.count ?? 0) / stats.total_payloads) *
+          100
+        ).toFixed(2)}%`}
+        context={`% of all relay blocks built by ${stats.relays[0]?.name}.`}
       />
 
       {/* Active relays */}
       <Stat
         title="Active relays"
         value={stats.relays.length.toLocaleString("us-en")}
-        context={`Number of relays delivering at least 1 of the last 1,000 payloads (${stats.relays
+        context={`Relays delivering at least one block (${stats.relays
           .map(({ name }) => name)
           .join(", ")}).`}
       />
@@ -53,32 +66,34 @@ const stats: Stats = JSON.parse(statsStr ?? "");
       {/* Top relays */}
       <Ranking
         title="Top relays"
-        context="Relays sorted by participation in last 1,000 payloads."
+        context="Relays sorted by number of delivered blocks."
         data={stats.relays
           // Filter for relays that have delivered at least 1 payload
           .filter(({ count }) => count > 0)
           // Setup table structure
-          .map(({ name, reward, count }) => ({
+          .map(({ name, value, count, avg_value }) => ({
             Relay: name,
-            "Total value (ETH)": reward.toLocaleString("us-en"),
-            "# Payloads": count,
+            "# Blocks": count,
+            "Total value (ETH)": value.toLocaleString("us-en"),
+            "Avg. block value": avg_value.toLocaleString("us-en"),
           }))}
       />
 
       {/* Top builders */}
       <Ranking
         title="Top builders"
-        context="Block builders sorted by participation in last 1,000 payloads."
+        context="Block builders sorted by number of delivered blocks."
         data={stats.builders
           // Filter for builders that have delivered at least 1 payload
           .filter(({ count }) => count > 0)
           // Setup table structure
-          .map(({ builder_pubkey, count }) => ({
+          .map(({ pubkey, count, value, avg_value, last_relay }) => ({
             Builder:
-              builder_pubkey.substr(0, 10) +
-              "..." +
-              builder_pubkey.slice(builder_pubkey.length - 10),
-            "# Payloads": count,
+              pubkey.substr(0, 10) + "..." + pubkey.slice(pubkey.length - 10),
+            "# Blocks": count,
+            "Total value (ETH)": value.toLocaleString("us-en"),
+            "Avg. block value": avg_value.toLocaleString("us-en"),
+            "Last used relay": last_relay,
           }))}
       />
     </div>
