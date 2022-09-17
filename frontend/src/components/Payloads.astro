@@ -1,5 +1,10 @@
 ---
-import { collectPayloads } from "../pages/payloads";
+/**
+ * In pursuit of dependency minimization, raw JS is used via an inline script
+ * to populate the recent payloads table, on-demand
+ * FIXME: should use cursor navigation to prevent duplicates on table update
+ */
+import { collectPayloads, Payload } from "../pages/payloads";
 
 // Table headers
 const headers: string[] = [
@@ -11,18 +16,19 @@ const headers: string[] = [
   "Proposer",
 ];
 
-// Collect initial payloads
-const data = await collectPayloads();
+// Collect latest 25 payloads
+const data: Payload[] = await collectPayloads();
 ---
 
 <div class="payloads">
+  {/* Table header */}
   <div class="payloads-title">
     <h3>Recent payloads</h3>
     <p>Delivered payloads sorted by slot.</p>
   </div>
 
   <div class="payloads-table">
-    <table>
+    <table id="payloads-table-ref">
       {/* Render headers */}
       <tr>
         {headers.map((key: string) => <th>{key}</th>)}
@@ -32,12 +38,17 @@ const data = await collectPayloads();
       {
         data.map((p: any) => (
           <tr>
+            {/* Slot */}
             <td>
               <a href={p.slot.url} target="_blank" rel="noopener noreferrer">
                 {p.slot.text}
               </a>
             </td>
+
+            {/* Relay */}
             <td>{p.relay}</td>
+
+            {/* Parent Hash */}
             <td>
               <a
                 href={p.parent_hash.url}
@@ -47,6 +58,8 @@ const data = await collectPayloads();
                 {p.parent_hash.text}
               </a>
             </td>
+
+            {/* Block Hash */}
             <td>
               <a
                 href={p.block_hash.url}
@@ -56,7 +69,11 @@ const data = await collectPayloads();
                 {p.block_hash.text}
               </a>
             </td>
+
+            {/* Builder */}
             <td>{p.builder}</td>
+
+            {/* Proposer */}
             <td>{p.proposer}</td>
           </tr>
         ))
@@ -64,19 +81,93 @@ const data = await collectPayloads();
     </table>
   </div>
 
-  <button onclick="onSubmit()">Add more</button>
+  <button class="payloads-more" onclick="loadMore()">Load 25 More</button>
 </div>
 
 <script is:inline>
-  async function onSubmit() {
-    const response = await fetch("http://localhost:3000/payloads");
+  /**
+   * Creates <a> element with url and text
+   */
+  function createLink(url, text) {
+    const link = document.createElement("a");
+    link.href = url;
+    link.text = text;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    return link;
+  }
+
+  /**
+   * Creates <tr> element containing children
+   */
+  function generateRow(data) {
+    // Row
+    const tableRow = document.createElement("tr");
+
+    // Slot
+    const slotTd = document.createElement("td");
+    const slotLink = createLink(data.slot.url, data.slot.text);
+    slotTd.appendChild(slotLink);
+
+    // Relay
+    const relayTd = document.createElement("td");
+    relayTd.innerHTML = data.relay;
+
+    // Parent Hash
+    const parentHashTd = document.createElement("td");
+    const parentHashLink = createLink(
+      data.parent_hash.url,
+      data.parent_hash.text
+    );
+    parentHashTd.appendChild(parentHashLink);
+
+    // Block Hash
+    const blockHashTd = document.createElement("td");
+    const blockHashLink = createLink(data.block_hash.url, data.block_hash.text);
+    blockHashTd.appendChild(blockHashLink);
+
+    // Builder
+    const builderTd = document.createElement("td");
+    builderTd.innerHTML = data.builder;
+
+    // Proposer
+    const proposerTd = document.createElement("td");
+    proposerTd.innerHTML = data.proposer;
+
+    // Append to row
+    tableRow.appendChild(slotTd);
+    tableRow.appendChild(relayTd);
+    tableRow.appendChild(parentHashTd);
+    tableRow.appendChild(blockHashTd);
+    tableRow.appendChild(builderTd);
+    tableRow.appendChild(proposerTd);
+
+    return tableRow;
+  }
+
+  /**
+   * Load 25 additional payloads from database
+   */
+  async function loadMore() {
+    // Check for global offset store
+    if (!window.RelayReviewOffset) window.RelayReviewOffset = 25;
+
+    // Collect payloads
+    const response = await fetch(
+      `/payloads?offset=${window.RelayReviewOffset}`
+    );
     const data = await response.json();
-    const div = document.getElementsByClassName("payloads")[0];
-    for (const item of data) {
-      const li = document.createElement("li");
-      li.innerHTML = item.slot;
-      div.appendChild(li);
+
+    // Find table
+    const table = document.getElementById("payloads-table-ref");
+
+    // Generate rows
+    for (const payload of data) {
+      table.appendChild(generateRow(payload));
     }
+
+    // Increment offset
+    window.RelayReviewOffset = window.RelayReviewOffset + 25;
   }
 </script>
 
@@ -99,6 +190,29 @@ const data = await collectPayloads();
         font-size: 14px;
         line-height: 150%;
       }
+    }
+
+    .payloads-table {
+      overflow-x: auto;
+
+      table {
+        min-width: 1200px;
+      }
+    }
+  }
+
+  .payloads-more {
+    width: 100%;
+    border: none;
+    background-color: #ececec;
+    font-weight: bold;
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.8);
+    padding: 15px;
+    cursor: pointer;
+
+    &:hover {
+      opacity: 0.8;
     }
   }
 </style>
