@@ -5,6 +5,7 @@ import vercel from "@astrojs/vercel/serverless";
 
 // https://astro.build/config
 export default defineConfig({
+  site: "https://mevboost.org",
   output: "server",
   adapter: vercel(),
   integrations: [compress(), robotsTxt()],
