@@ -74,7 +74,7 @@ export default class Transformer {
     // wei => BN
     const wei: ethers.BigNumber = ethers.utils.parseUnits(w, "wei");
     // BN => string
-    const ether: string = ethers.utils.formatUnits(wei, "wei");
+    const ether: string = ethers.utils.formatEther(wei);
     // String => number
     return Number(ether);
   }
