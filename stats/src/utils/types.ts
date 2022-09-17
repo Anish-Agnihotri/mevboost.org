@@ -10,3 +10,26 @@ export type BidTrace = {
   gas_used: string;
   value: string;
 };
+
+export type RelayDetail = {
+  name: string;
+  value: number;
+  count: number;
+  avg_value: number;
+};
+
+export type BuilderDetail = {
+  pubkey: string;
+  count: number;
+  value: number;
+  avg_value: number;
+  last_relay: string;
+};
+
+export type StatSummary = {
+  last_slot: number;
+  total_blocks: number;
+  total_payloads: number;
+  relays: RelayDetail[];
+  builders: BuilderDetail[];
+};
