@@ -9,6 +9,13 @@ Relay configs can be updated in [config.json](./config.json).
 ## Run locally
 
 ```bash
+
+# Create Prisma Client
+npx prisma generate
+
+# Push schema to db
+npx prisma db push
+
 # Update env vars
 cp .env.sample .env
 vim .env
