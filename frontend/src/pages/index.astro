@@ -1,22 +1,10 @@
 ---
 import Redis from "ioredis";
+import type { Stats } from "./stats";
 import Stat from "../components/Stat.astro";
 import Layout from "../layouts/Layout.astro";
 import Ranking from "../components/Ranking.astro";
 import Payloads from "../components/Payloads.astro";
-
-type Stats = {
-  total_blocks: number;
-  total_payloads: number;
-  relays: { name: string; value: number; count: number; avg_value: number }[];
-  builders: {
-    pubkey: string;
-    count: number;
-    value: number;
-    avg_value: number;
-    last_relay: string;
-  }[];
-};
 
 // Setup redis
 const redis = new Redis(import.meta.env.REDIS_URL);
