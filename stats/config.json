@@ -1,9 +1,9 @@
 {
   "relays": {
-    "Flashbots": "https://boost-relay.flashbots.net/",
-    "BloXroute Max Profit": "https://bloxroute.max-profit.blxrbdn.com/",
-    "BloXroute Ethical": "https://bloxroute.ethical.blxrbdn.com/",
-    "BloXroute Regulated": "https://bloxroute.regulated.blxrbdn.com/",
+    "Flashbots": "https://boost-relay.flashbots.net",
+    "BloXroute Max Profit": "https://bloxroute.max-profit.blxrbdn.com",
+    "BloXroute Ethical": "https://bloxroute.ethical.blxrbdn.com",
+    "BloXroute Regulated": "https://bloxroute.regulated.blxrbdn.com",
     "Blocknative": "https://builder-relay-mainnet.blocknative.com",
     "Manifold": "https://mainnet-relay.securerpc.com",
     "Eden": "https://relay.edennetwork.io"

@@ -1,6 +1,7 @@
 import dotenv from "dotenv"; // Env vars
 import CONFIG from "../config.json"; // Config
 import Extractor from "./extractor"; // Collection
+import logger from "./utils/logger"; // Logging
 import Transformer from "./transformer"; // Stats
 
 // Setup env vars
@@ -21,5 +22,10 @@ dotenv.config();
 
   // Setup sync processes
   const processes: Promise<void>[] = relays.map((relay) => relay.sync());
-  Promise.allSettled([...processes, stats.sync()]);
+  try {
+    await Promise.all([...processes, stats.sync()]);
+  } catch {
+    logger.error("Main: exited with sync error");
+    throw new Error("Main: exited with sync error");
+  }
 })();
