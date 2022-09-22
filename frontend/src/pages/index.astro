@@ -24,9 +24,9 @@ const stats: Stats = JSON.parse(statsStr ?? "");
         value={`${((stats.total_payloads / stats.total_blocks) * 100).toFixed(
           2
         )}%`}
-        context={`% of all blocks built by relays (${stats.total_payloads.toLocaleString(
+        context={`% of MEV-Boost blocks (${stats.total_payloads.toLocaleString(
           "us-en"
-        )} relays, ${stats.total_blocks.toLocaleString("us-en")} total).`}
+        )} relayed; ${stats.total_blocks.toLocaleString("us-en")} total).`}
       />
 
       {/* Relay dominance */}
@@ -36,14 +36,14 @@ const stats: Stats = JSON.parse(statsStr ?? "");
           ((stats.relays[0]?.count ?? 0) / stats.total_payloads) *
           100
         ).toFixed(2)}%`}
-        context={`% of all MEV-Boost blocks relayed via ${stats.relays[0]?.name}.`}
+        context={`% of MEV-Boost blocks relayed via ${stats.relays[0]?.name}.`}
       />
 
       {/* Active relays */}
       <Stat
         title="Active relays"
         value={stats.relays.length.toLocaleString("us-en")}
-        context={`Relays delivering at least one block (${stats.relays
+        context={`Relays that relayed at least one block (${stats.relays
           .map(({ name }) => name)
           .join(", ")}).`}
       />
@@ -54,9 +54,9 @@ const stats: Stats = JSON.parse(statsStr ?? "");
       {/* Top relays */}
       <Ranking
         title="Top relays"
-        context="Relays sorted by number of delivered blocks."
+        context="Relays sorted by number of relayed blocks."
         data={stats.relays
-          // Filter for relays that have delivered at least 1 payload
+          // Filter for relays that have relayed at least 1 payload
           .filter(({ count }) => count > 0)
           // Setup table structure
           .map(({ name, value, count, avg_value }) => ({
@@ -70,9 +70,9 @@ const stats: Stats = JSON.parse(statsStr ?? "");
       {/* Top builders */}
       <Ranking
         title="Top builders"
-        context="Block builders sorted by number of delivered blocks."
+        context="Block builders sorted by number of built blocks."
         data={stats.builders
-          // Filter for builders that have delivered at least 1 payload
+          // Filter for builders that have built at least 1 block
           .filter(({ count }) => count > 0)
           // Setup table structure
           .map(({ pubkey, count, value, avg_value, last_relay }) => ({
