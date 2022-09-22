@@ -36,7 +36,7 @@ const stats: Stats = JSON.parse(statsStr ?? "");
           ((stats.relays[0]?.count ?? 0) / stats.total_payloads) *
           100
         ).toFixed(2)}%`}
-        context={`% of MEV-Boost blocks relayed via ${stats.relays[0]?.name}.`}
+        context={`% of MEV-Boost blocks relayed by ${stats.relays[0]?.name}.`}
       />
 
       {/* Active relays */}
