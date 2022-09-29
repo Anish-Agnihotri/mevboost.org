@@ -2,8 +2,15 @@ import Redis from "ioredis"; // Cache
 
 // Payload type
 export type Stats = {
-  total_blocks: number;
-  total_payloads: number;
+  last_slot: number;
+  total: {
+    blocks: number;
+    payloads: number;
+  };
+  daily: {
+    blocks: number;
+    payloads: number;
+  };
   relays: { name: string; value: number; count: number; avg_value: number }[];
   builders: {
     pubkey: string;

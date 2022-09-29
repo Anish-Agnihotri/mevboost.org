@@ -20,20 +20,20 @@ const stats: Stats = JSON.parse(statsStr ?? "");
     <div class="stat-list">
       {/* Network participation */}
       <Stat
-        title="Network participation"
-        value={`${((stats.total_payloads / stats.total_blocks) * 100).toFixed(
+        title="Network participation (last 24h)"
+        value={`${((stats.daily.payloads / stats.daily.blocks) * 100).toFixed(
           2
         )}%`}
-        context={`% of all blocks built by relays (${stats.total_payloads.toLocaleString(
+        context={`% of all blocks built by relays in last 24h (${stats.daily.payloads.toLocaleString(
           "us-en"
-        )} relays, ${stats.total_blocks.toLocaleString("us-en")} total).`}
+        )} relays, ${stats.daily.blocks.toLocaleString("us-en")} total).`}
       />
 
       {/* Relay dominance */}
       <Stat
         title={`${stats.relays[0]?.name} dominance`}
         value={`${(
-          ((stats.relays[0]?.count ?? 0) / stats.total_payloads) *
+          ((stats.relays[0]?.count ?? 0) / stats.total.payloads) *
           100
         ).toFixed(2)}%`}
         context={`% of all MEV-Boost blocks relayed via ${stats.relays[0]?.name}.`}
