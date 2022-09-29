@@ -1,9 +1,9 @@
 ---
+import Alert from "../components/Alert.astro";
 import Header from "../components/Header.astro";
 
 const title = "mevboost.org | MEV-Boost Tracker";
-const description =
-  "Track MEV-Boost relays and block builders.";
+const description = "Track MEV-Boost relays and block builders.";
 const website = "https://mevboost.org";
 const image = "https://mevboost.org/meta.png";
 ---
@@ -42,6 +42,7 @@ const image = "https://mevboost.org/meta.png";
   </head>
 
   <body>
+    <Alert />
     <Header />
     <slot />
 

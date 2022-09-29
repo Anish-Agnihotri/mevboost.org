@@ -1,16 +1,16 @@
 ---
 export interface RelayProps {
   Relay: string;
-  "# Blocks": number;
+  "# Blocks": string;
   "Total value (ETH)": string;
-  "Avg. block value": string;
+  "Average block value (ETH)": string;
 }
 
 export interface BuilderProps {
   Builder: string;
-  "# Blocks": number;
+  "# Blocks": string;
   "Total value (ETH)": string;
-  "Avg. block value": string;
+  "Average block value (ETH)": string;
   "Last used relay": string;
 }
 
@@ -54,9 +54,6 @@ const { title, context, data } = Astro.props as Props;
 
 <style lang="scss">
   .ranking {
-    width: 50%;
-    border-bottom: 1px solid #ececec;
-
     &:not(last-of-type) {
       border-right: 1px solid #ececec;
     }
@@ -85,21 +82,6 @@ const { title, context, data } = Astro.props as Props;
 
       table {
         min-width: 600px;
-      }
-    }
-  }
-
-  @media screen and (max-width: 800px) {
-    .ranking {
-      width: 100%;
-
-      .ranking-table {
-        tr:last-of-type {
-          th,
-          td {
-            border-bottom: none;
-          }
-        }
       }
     }
   }

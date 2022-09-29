@@ -61,9 +61,9 @@ const stats: Stats = JSON.parse(statsStr ?? "");
           // Setup table structure
           .map(({ name, value, count, avg_value }) => ({
             Relay: name,
-            "# Blocks": count,
+            "# Blocks": count.toLocaleString("us-en"),
             "Total value (ETH)": value.toLocaleString("us-en"),
-            "Avg. block value": avg_value.toLocaleString("us-en"),
+            "Average block value (ETH)": avg_value.toLocaleString("us-en"),
           }))}
       />
 
@@ -78,9 +78,9 @@ const stats: Stats = JSON.parse(statsStr ?? "");
           .map(({ pubkey, count, value, avg_value, last_relay }) => ({
             Builder:
               pubkey.substr(0, 10) + "..." + pubkey.slice(pubkey.length - 10),
-            "# Blocks": count,
+            "# Blocks": count.toLocaleString("us-en"),
             "Total value (ETH)": value.toLocaleString("us-en"),
-            "Avg. block value": avg_value.toLocaleString("us-en"),
+            "Average block value (ETH)": avg_value.toLocaleString("us-en"),
             "Last used relay": last_relay,
           }))}
       />
@@ -92,14 +92,12 @@ const stats: Stats = JSON.parse(statsStr ?? "");
 </Layout>
 
 <style>
-  .stat-list,
-  .ranking-list {
+  .stat-list {
     display: flex;
   }
 
   @media screen and (max-width: 800px) {
-    .stat-list,
-    .ranking-list {
+    .stat-list {
       flex-direction: column;
     }
   }
