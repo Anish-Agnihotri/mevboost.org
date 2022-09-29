@@ -4,7 +4,7 @@
  * to populate the recent payloads table, on-demand
  * FIXME: should use cursor navigation to prevent duplicates on table update
  */
-import { collectPayloads, Payload } from "../pages/payloads";
+import { collectPayloads, Payload } from "../pages/formatted";
 
 // Table headers
 const headers: string[] = [
@@ -154,7 +154,7 @@ const data: Payload[] = await collectPayloads();
 
     // Collect payloads
     const response = await fetch(
-      `/payloads?offset=${window.RelayReviewOffset}`
+      `/formatted?offset=${window.RelayReviewOffset}`
     );
     const data = await response.json();
 
