@@ -62,11 +62,11 @@ export default class Extractor {
       // Return BidTraces
       return data;
     } catch {
-      // Log error + throw
+      // Log error + return no bids (failure escape prevention)
       logger.error(
         `${this.relay.name}: Error collecting payload (cursor: ${cursor})`
       );
-      throw new Error("Error collecting payloads.");
+      return [];
     }
   }
 

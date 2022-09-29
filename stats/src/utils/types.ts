@@ -28,8 +28,14 @@ export type BuilderDetail = {
 
 export type StatSummary = {
   last_slot: number;
-  total_blocks: number;
-  total_payloads: number;
+  total: {
+    blocks: number;
+    payloads: number;
+  };
+  daily: {
+    blocks: number;
+    payloads: number;
+  };
   relays: RelayDetail[];
   builders: BuilderDetail[];
 };
