@@ -7,4 +7,8 @@ export default {
   FIRST_POS_BLOCK_TS: 1663224179,
   // https://beaconcha.in/slot/4700013
   FIRST_POS_BLOCK_SLOT: 4700013,
+  // Relays with double pagination limit
+  DOUBLE_PAGINATION_LIMIT: ["Flashbots"],
+  // Maximum retries for a relay
+  ERROR_RETRY_LIMIT: 5,
 };

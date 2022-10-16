@@ -1,10 +1,15 @@
 import axios from "axios"; // Requests
 import Redis from "ioredis"; // Cache
 import logger from "./utils/logger"; // Logging
+import constants from "./utils/constants"; // Constants
 import type { BidTrace } from "./utils/types"; // Types
 import { PrismaClient } from "@prisma/client"; // Prisma
 
 export default class Extractor {
+  // Error count during payload collection
+  private errors: number = 0;
+  // Relay supported pagination limit
+  private limit: number = 100;
   // Last synced slot
   private syncedSlot: string | undefined;
   // Relay info
@@ -16,15 +21,21 @@ export default class Extractor {
   private prisma: PrismaClient = new PrismaClient();
 
   /**
-   * Initialize new collector
+   * Initialize new extractor
    * @param {string} name of relay
    * @param {string} url of relay
    * @param {string} redisUrl to connect
    */
   constructor(name: string, url: string, redisUrl: string) {
-    logger.info(`Collector: initializing relay: ${name}`);
+    logger.info(`${name}: initializing relay`);
     this.relay = { name, url };
     this.redis = new Redis(redisUrl);
+
+    // Dynamically set limit (Flashbots allows 200)
+    if (constants.DOUBLE_PAGINATION_LIMIT.includes(name)) {
+      logger.info(`${name}: Supports double pagination limit`);
+      this.limit = 200;
+    }
   }
 
   /**
@@ -39,8 +50,10 @@ export default class Extractor {
       const { data }: { data: BidTrace[] } = await axios.get(
         `${
           this.relay.url
-          // Collect 100 payloads
-        }/relay/v1/data/bidtraces/proposer_payload_delivered?limit=100${
+          // Collect limit payloads
+        }/relay/v1/data/bidtraces/proposer_payload_delivered?limit=${
+          this.limit
+        }${
           // With optional cursor
           cursor ? `&cursor=${cursor}` : ""
         }`
@@ -55,18 +68,43 @@ export default class Extractor {
       // Log retrieval
       const newestSlot: string = data[0].slot;
       const oldestSlot: string = data[data.length - 1].slot;
+
+      // If first sync, log distance to first POS block
+      let remainderSlots: string = "";
+      // If first sync
+      if (!this.syncedSlot) {
+        // Log distance till first slot
+        remainderSlots = ` (remainder: ${
+          Number(oldestSlot) - constants.FIRST_POS_BLOCK_SLOT
+        })`;
+      }
       logger.info(
-        `${this.relay.name}: Collected ${data.length} payloads (${newestSlot} -> ${oldestSlot})`
+        `${this.relay.name}: Collected ${data.length} payloads (${newestSlot} -> ${oldestSlot})${remainderSlots}`
       );
 
       // Return BidTraces
       return data;
     } catch {
-      // Log error + return no bids (failure escape prevention)
+      // Log error
       logger.error(
         `${this.relay.name}: Error collecting payload (cursor: ${cursor})`
       );
-      return [];
+
+      // If errors > max, return
+      if (this.errors > constants.ERROR_RETRY_LIMIT) {
+        logger.error(`${this.relay.name}: Reached max retry limit`);
+        return [];
+      }
+
+      // Else, exponentionally time-off rate-limit
+      this.errors += 1;
+      // 5s, 20s, 45s, 80s, 125s
+      const timeOut = this.errors * this.errors * 5000;
+      logger.info(
+        `${this.relay.name}: Rate-limit sleeping for ${timeOut / 1000}s`
+      );
+      await new Promise((res) => setTimeout(res, timeOut));
+      return await this.collectPayloads(cursor);
     }
   }
 
@@ -92,6 +130,9 @@ export default class Extractor {
   ): Promise<BidTrace[]> {
     let payloads: BidTrace[] = [];
 
+    // Rate-limit collection to limit per 2s
+    await new Promise((res) => setTimeout(res, 2000));
+
     // Collect initial payload
     const initialPayload: BidTrace[] = await this.collectPayloads(cursor);
     payloads = [...payloads, ...initialPayload];
@@ -112,8 +153,8 @@ export default class Extractor {
       }
     }
 
-    // If initial collection has 100 entities, paginate recursively
-    if (initialPayload.length === 100) {
+    // If initial collection has limit entities, paginate recursively
+    if (initialPayload.length === this.limit) {
       const lastSlot: string = initialPayload[initialPayload.length - 1].slot;
       const lastCursor: string = String(Number(lastSlot) - 1);
       const nextPayload: BidTrace[] = await this.collectFreshPayloads(
@@ -130,6 +171,9 @@ export default class Extractor {
    * Syncs fresh payloads to database
    */
   private async syncFreshPayloads(): Promise<void> {
+    // Update caught errors to 0
+    this.errors = 0;
+
     // Update last synced slot
     await this.updateSyncedSlot();
 
@@ -149,11 +193,19 @@ export default class Extractor {
       // Insert payloads into database
       const { count }: { count: number } =
         await this.prisma.payloads.createMany({
-          data: freshPayloads.map((payload) => ({
-            ...payload,
+          data: freshPayloads.map((payload: BidTrace) => ({
             // Attach relay name
             relay: this.relay.name,
+            // Force parameters (to prevent additional params)
             slot: Number(payload.slot),
+            parent_hash: payload.parent_hash,
+            block_hash: payload.block_hash,
+            builder_pubkey: payload.builder_pubkey,
+            proposer_pubkey: payload.proposer_pubkey,
+            proposer_fee_recipient: payload.proposer_fee_recipient,
+            gas_limit: payload.gas_limit,
+            gas_used: payload.gas_used,
+            value: payload.value,
           })),
         });
 
