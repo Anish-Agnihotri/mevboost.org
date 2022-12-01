@@ -1,4 +1,6 @@
 import { PrismaClient, payloads } from "@prisma/client"; // DB
+import { ethers } from "ethers"; 
+
 
 // Setup Prisma
 const client = new PrismaClient();
@@ -12,6 +14,7 @@ export type Payload = {
   block_hash: Link;
   builder: string;
   proposer: string;
+  value: string;
 };
 
 /**
@@ -21,6 +24,11 @@ export type Payload = {
  */
 function truncateString(str: string): string {
   return str.substr(0, 10) + "..." + str.slice(str.length - 10);
+}
+
+function weiStringToETH(w: string): string {
+  const wei = ethers.utils.parseUnits(w, "wei");
+  return ethers.utils.formatEther(wei);
 }
 
 /**
@@ -55,6 +63,7 @@ export async function collectPayloads(offset: number = 0): Promise<Payload[]> {
     },
     builder: truncateString(p.builder_pubkey),
     proposer: truncateString(p.proposer_pubkey),
+    value: weiStringToETH(p.value),
   }));
 }
 

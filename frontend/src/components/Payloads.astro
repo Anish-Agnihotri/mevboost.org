@@ -14,6 +14,7 @@ const headers: string[] = [
   "Block Hash",
   "Builder",
   "Proposer",
+  "MEV Reward"
 ];
 
 // Collect latest 25 payloads
@@ -75,6 +76,9 @@ const data: Payload[] = await collectPayloads();
 
             {/* Proposer */}
             <td>{p.proposer}</td>
+
+            {/* Value */}
+            <td>{p.value}</td>
           </tr>
         ))
       }
@@ -134,6 +138,10 @@ const data: Payload[] = await collectPayloads();
     const proposerTd = document.createElement("td");
     proposerTd.innerHTML = data.proposer;
 
+    // Proposer
+    const valueTd = document.createElement("td");
+    valueTd.innerHTML = data.value;
+
     // Append to row
     tableRow.appendChild(slotTd);
     tableRow.appendChild(relayTd);
@@ -141,6 +149,7 @@ const data: Payload[] = await collectPayloads();
     tableRow.appendChild(blockHashTd);
     tableRow.appendChild(builderTd);
     tableRow.appendChild(proposerTd);
+    tableRow.appendChild(valueTd);
 
     return tableRow;
   }
