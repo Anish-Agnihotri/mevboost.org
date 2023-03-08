@@ -30,6 +30,8 @@ Endpoint implemented in [./frontend/src/pages/stats.ts](./frontend/src/pages/sta
     blocks: 7200,
     // Number of blocks from relays in last 24h
     payloads: 2724,
+    // Number fo blocks from leading relay in last 24h
+    topRelayPayloads: 100,
   },
   relays: [
     {

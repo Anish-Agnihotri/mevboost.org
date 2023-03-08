@@ -43,6 +43,7 @@ export default class Transformer {
   private async collectDailyStatistics(): Promise<{
     blocks: number;
     payloads: number;
+    topRelayPayloads: number;
   }> {
     // Collect approximate head slot
     const currentTimestamp: number = +new Date() / 1000;
@@ -56,15 +57,36 @@ export default class Transformer {
     const slot24HAgo: number = approxHeadSlot - CONSTANTS.SLOTS_PER_DAY;
 
     // Count number of relay blocks proposed after slot
-    const payloads = await this.prisma.payloads.count({
-      where: {
-        slot: {
-          gte: slot24HAgo,
+    const payloads: { relay: string }[] = 
+      await this.prisma.payloads.findMany({
+        // Some relays double-report as shared block
+        distinct: ['slot'],
+        where: {
+          slot: {
+            gte: slot24HAgo,
+          },
         },
-      },
-    });
+        select: {
+          // Minimize payload size
+          relay: true,
+        },
+      });
 
-    return { blocks: CONSTANTS.SLOTS_PER_DAY, payloads };
+    // Find number of payloads proposed by top relay
+    let relayToOccurence: Record<string, number> = {};
+    for (const { relay } of payloads) {
+      if (relayToOccurence[relay]) relayToOccurence[relay]++;
+      else relayToOccurence[relay] = 1;
+    }
+    const topRelayPayloads: number = Math.max(
+      ...Object.values(relayToOccurence)
+    );
+
+    return { 
+      blocks: CONSTANTS.SLOTS_PER_DAY,
+      payloads: payloads.length,
+      topRelayPayloads
+    };
   }
 
   /**
@@ -79,7 +101,7 @@ export default class Transformer {
   ): Promise<{
     last_slot: number;
     total: { blocks: number; payloads: number };
-    daily: { blocks: number; payloads: number };
+    daily: { blocks: number; payloads: number, topRelayPayloads: number };
   }> {
     // Calculate total blocks since merge
     const latestBlock: number = await this.collectLatestBlock();

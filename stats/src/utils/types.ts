@@ -35,6 +35,7 @@ export type StatSummary = {
   daily: {
     blocks: number;
     payloads: number;
+    topRelayPayloads: number;
   };
   relays: RelayDetail[];
   builders: BuilderDetail[];

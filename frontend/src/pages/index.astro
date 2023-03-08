@@ -29,12 +29,12 @@ const stats: Stats = JSON.parse(statsStr ?? "");
 
       {/* Relay dominance */}
       <Stat
-        title={`${stats.relays[0]?.name} dominance`}
+        title={`${stats.relays[0]?.name} dominance (24h)`}
         value={`${(
-          ((stats.relays[0]?.count ?? 0) / stats.total.payloads) *
+          ((stats.daily.topRelayPayloads ?? 0) / stats.daily.blocks) *
           100
         ).toFixed(2)}%`}
-        context={`% of MEV-Boost blocks relayed by ${stats.relays[0]?.name}.`}
+        context={`% of MEV-Boost blocks relayed by ${stats.relays[0]?.name} in last 24h.`}
       />
 
       {/* Active relays */}
